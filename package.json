@@ -1,0 +1,11 @@
+{
+  "name": "gift-anniversary",
+  "version": "1.0.0",
+  "description": "Small celebratory page with animations and a visual test scaffold",
+  "scripts": {
+    "test": "node tests/screenshot.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.40.0"
+  }
+}
