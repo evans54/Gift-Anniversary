@@ -257,14 +257,22 @@ function createConfetti(count = 40) {
       el.style.height = size + 'px';
       el.style.left = x + 80 * Math.random() - 40 + 'vw';
       el.style.top = '-12vh';
-      el.style.opacity = 0.9 + 0.1 * Math.random();
+      el.style.opacity = 0.85 + 0.15 * Math.random();
       el.style.transform = 'rotate(' + 360 * Math.random() + 'deg)';
-      const dur = 1200 + 1200 * Math.random();
-      el.style.animationDuration = dur + 'ms';
+      const fallDur = 1600 + 1400 * Math.random();
+      const rotDur = 1600 + 2000 * Math.random();
+      const swayDur = 1200 + 1600 * Math.random();
+      const delay = Math.floor(Math.random() * 300);
+      // use CSS variables so each piece can have independent timings
+      el.style.setProperty('--fall-dur', fallDur + 'ms');
+      el.style.setProperty('--rot-dur', rotDur + 'ms');
+      el.style.setProperty('--sway-dur', swayDur + 'ms');
+      el.style.setProperty('--delay', delay + 'ms');
+      el.style.setProperty('--sway', (8 + 28 * Math.random()) + 'px');
       const fill = colors[Math.floor(colors.length * Math.random())];
       el.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g transform="translate(12,12)"><circle r="2.2" fill="' + fill + '"/><g fill="' + fill + '" opacity="0.95"><ellipse rx="1.8" ry="3.6" transform="rotate(0) translate(0,-6)"/><ellipse rx="1.8" ry="3.6" transform="rotate(60) translate(0,-6)"/><ellipse rx="1.8" ry="3.6" transform="rotate(120) translate(0,-6)"/><ellipse rx="1.8" ry="3.6" transform="rotate(180) translate(0,-6)"/><ellipse rx="1.8" ry="3.6" transform="rotate(240) translate(0,-6)"/><ellipse rx="1.8" ry="3.6" transform="rotate(300) translate(0,-6)"/></g></g></svg>';
       container.appendChild(el);
-      setTimeout(() => el.remove(), dur + 400);
+      setTimeout(() => el.remove(), fallDur + 600);
     } else {
       const el = document.createElement('div');
       el.className = 'confetti-piece';
@@ -275,12 +283,19 @@ function createConfetti(count = 40) {
       el.style.background = colors[Math.floor(colors.length * Math.random())];
       el.style.left = x + 80 * Math.random() - 40 + 'vw';
       el.style.top = '-10vh';
-      el.style.opacity = 0.9 + 0.1 * Math.random();
+      el.style.opacity = 0.85 + 0.15 * Math.random();
       el.style.transform = 'rotate(' + 360 * Math.random() + 'deg)';
-      const dur = 1100 + 1200 * Math.random();
-      el.style.animationDuration = dur + 'ms';
+      const fallDur = 1400 + 1600 * Math.random();
+      const rotDur = 1000 + 2000 * Math.random();
+      const swayDur = 1000 + 1400 * Math.random();
+      const delay = Math.floor(Math.random() * 300);
+      el.style.setProperty('--fall-dur', fallDur + 'ms');
+      el.style.setProperty('--rot-dur', rotDur + 'ms');
+      el.style.setProperty('--sway-dur', swayDur + 'ms');
+      el.style.setProperty('--delay', delay + 'ms');
+      el.style.setProperty('--sway', (6 + 26 * Math.random()) + 'px');
       container.appendChild(el);
-      setTimeout(() => el.remove(), 3000);
+      setTimeout(() => el.remove(), fallDur + 800);
     }
   }
 }
