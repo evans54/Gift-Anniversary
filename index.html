@@ -1,593 +1,132 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>One Month Surprise</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg-1: #fff7f7;
-      --accent: #ff5e5e;
-      --accent-2: #ff7878;
-      --card-bg: #ffffff;
-      --muted: #666;
-      --surface-shadow: 0 8px 30px rgba(15,15,15,0.06);
-      --max-container: 760px;
-    }
-
+    :root{--accent:#ff5e5e;--accent-2:#ff7878;--muted:#666;--shadow:0 8px 30px rgba(15,15,15,.06)}
     *{box-sizing:border-box}
     html,body{height:100%;margin:0}
-    body{
-      margin:0;
-      font-family: 'Montserrat', 'Segoe UI', Roboto, system-ui, -apple-system, 'Helvetica Neue', Arial;
-      background: linear-gradient(180deg, #fff 0%, #fff7fb 100%);
-      color: #222;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:40px 20px;
-      min-height:100vh;
-      overflow-x:hidden;
-    }
+    body{font-family:Montserrat,"Segoe UI",Roboto,system-ui,-apple-system,sans-serif;background:linear-gradient(180deg,#fff 0%,#fff7fb 100%);color:#222;display:flex;align-items:center;justify-content:center;padding:20px;min-height:100vh}
+    #container{width:100%;max-width:760px;background:rgba(255,255,255,.98);border-radius:18px;padding:24px;box-shadow:var(--shadow);text-align:center}
+    .hero{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+    .hero svg{width:80px;height:80px}
+    .story-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-top:20px}
+    .story-card{aspect-ratio:1;border-radius:12px;overflow:hidden;cursor:pointer;background:#f5f5f5}
+    .story-card img{width:100%;height:100%;object-fit:cover;display:block}
+    .section{display:none}
+    .section.active{display:block}
+    .story-bg{width:100%;aspect-ratio:16/10;border-radius:12px;overflow:hidden;margin-bottom:20px;background:#f0f0f0}
+    .story-bg img{width:100%;height:100%;object-fit:cover;display:block}
+    .controls{display:flex;gap:12px;justify-content:center;margin-top:20px}
+    button{padding:12px 18px;border:0;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff}
+    button.secondary{background:transparent;border:1px solid rgba(0,0,0,.06);color:var(--muted)}
+		@media(max-width:480px){body{padding:16px}#container{padding:20px}button{width:100%}}
 
-    #container{
-      width:100%;
-      max-width:var(--max-container);
-      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,250,0.99));
-      border-radius:18px;
-      padding:28px;
-      box-shadow: var(--surface-shadow);
-      text-align:center;
-      transition: transform 400ms ease, box-shadow 300ms ease;
-      position:relative;
-    }
+		/* Story modal styles */
+		.story-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1200;background:rgba(0,0,0,0.92)}
+		.story-modal[aria-hidden="true"]{display:none}
+		.sm-viewport{max-width:95vw;max-height:95vh;overflow:auto;border-radius:6px}
+		.sm-viewport img{display:block;max-width:100%;max-height:100%;height:auto;width:auto;margin:0 auto}
+		.sm-prev,.sm-next{position:fixed;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#fff;font-size:48px;padding:8px 12px;cursor:pointer;opacity:0.9}
+		.sm-prev{left:16px}
+		.sm-next{right:16px}
+		.sm-close{position:fixed;top:18px;right:18px;background:transparent;border:0;color:#fff;font-size:34px;padding:8px;cursor:pointer}
 
-    /* Hero */
-    .hero{
-      display:flex;
-      gap:18px;
-      align-items:center;
-      justify-content:center;
-      margin-bottom:12px;
-    }
+		/* Confetti styles: full-screen container and falling animations */
+		#confetti{position:fixed;inset:0;pointer-events:none;overflow:visible;z-index:1400}
+		.confetti-piece,.confetti-flower{position:absolute;top:-12vh;will-change:top,transform,opacity;}
+		.confetti-piece{border-radius:2px}
+		.confetti-flower svg{display:block;width:100%;height:100%}
+		.confetti-piece,.confetti-flower{animation-name:confetti-fall,confetti-rot;animation-timing-function:linear,linear;animation-fill-mode:forwards,none}
 
-    .hero svg{ width:84px; height:84px; flex:0 0 84px }
-    .hero h1{ font-size:20px; color:var(--muted); margin:0; text-align:left }
-    .hero p{margin:4px 0 0 0; font-weight:600 }
-
-    /* Section transitions */
-    .section{
-      opacity:0;
-      transform:translateY(10px) scale(.997);
-      max-height:0;
-      overflow:hidden;
-      transition: opacity 480ms cubic-bezier(.2,.9,.2,1), transform 480ms cubic-bezier(.2,.9,.2,1), max-height 480ms ease;
-      pointer-events:none;
-    }
-
-    .section.active{
-      opacity:1;
-      transform:translateY(0) scale(1);
-      max-height:1200px;
-      pointer-events:auto;
-    }
-
-    /* Buttons */
-    .controls{ display:flex; gap:12px; justify-content:center; margin-top:20px }
-    button{
-      padding:12px 18px;
-      font-size:16px;
-      cursor:pointer;
-      border:0;
-      background:linear-gradient(90deg,var(--accent),var(--accent-2));
-      color:white;
-      border-radius:10px;
-      box-shadow: 0 6px 18px rgba(255,94,94,0.18);
-      transition: transform 160ms ease, box-shadow 200ms ease, filter 160ms ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    button.secondary{
-      background:transparent;
-      border:1px solid rgba(0,0,0,0.06);
-      color:var(--muted);
-      box-shadow:none;
-    }
-
-    button:active{ transform: translateY(1px) scale(.995) }
-    button:hover{ filter:brightness(1.03) }
-    button:focus{ outline:3px solid rgba(255,94,94,0.12); outline-offset:3px }
-
-    @media (max-width:420px){ button{ width:100% } .controls{ flex-direction:column } }
-
-    /* Cards grid */
-  .cards{ margin-top:20px; display:grid; grid-template-columns:1fr; gap:12px }
-  .card{ padding:16px; border-radius:12px; background:var(--card-bg); box-shadow: 0 6px 20px rgba(20,20,20,0.04); color:#111; text-align:left; opacity:0; transform: translateY(10px) scale(.998); animation: cardIn 560ms cubic-bezier(.2,.9,.2,1) both; animation-delay: var(--d, 0ms); display:flex; align-items:center; justify-content:space-between; gap:12px }
-  .card .text{ flex:1 }
-  .card.show{ opacity:1 }
-
-  /* dancer visual inside card */
-  .dancer{ width:44px; height:44px; display:flex; align-items:center; justify-content:center; opacity:0; transform: translateY(6px) scale(.96); transition: opacity 220ms ease, transform 220ms ease }
-  .card.active .dancer{ opacity:1; transform: translateY(0) scale(1) }
-  .dancer .figure{ width:16px; height:16px; background:var(--accent); box-shadow: 0 6px 14px rgba(0,0,0,0.08); transform-origin:center; }
-  .dancer .figure.shape-circle{ border-radius:50% }
-  .dancer .figure.shape-square{ border-radius:6px }
-  .dancer .figure.shape-triangle{ width:0; height:0; background:transparent; border-left:9px solid transparent; border-right:9px solid transparent; border-bottom:16px solid var(--accent); }
-  /* simple dance animation */
-  @keyframes danceY{ 0%{ transform: translateY(0) rotate(0deg) } 50%{ transform: translateY(-8px) rotate(-12deg) } 100%{ transform: translateY(0) rotate(0deg) } }
-  .card.active .dancer .figure.shape-triangle{ animation: danceY 540ms ease-in-out infinite }
-  .card.active .dancer .figure.shape-circle{ animation: danceY 640ms ease-in-out infinite }
-  .card.active .dancer .figure.shape-square{ animation: danceY 480ms ease-in-out infinite }
-
-  .caption{ font-size:12px; color:var(--muted); display:flex; gap:6px; align-items:center }
-
-    @keyframes cardIn{ from{ opacity:0; transform: translateY(10px) scale(.998) } to{ opacity:1; transform: translateY(0) scale(1) } }
-
-    @media (min-width:720px){ .cards{ grid-template-columns: repeat(2, 1fr) } #container{ padding:34px } }
-
-    .playful{ margin-top:18px; font-size:18px; color:var(--accent) }
-
-    /* Confetti styles */
-    #confetti{
-      position:fixed; left:0; top:0; right:0; bottom:0; pointer-events:none; overflow:visible; z-index:60;
-    }
-
-    .confetti-piece{
-      position:absolute; width:10px; height:14px; opacity:0.95; transform-origin:center; border-radius:2px; will-change: transform, opacity;
-      animation: confettiFall linear forwards, confettiTilt 900ms ease-in-out infinite;
-    }
-
-    @keyframes confettiFall{
-      0%{ transform: translateY(-12vh) rotate(0deg) }
-      100%{ transform: translateY(110vh) rotate(720deg); opacity:0.95 }
-    }
-
-    /* small tilt for visual variety */
-    @keyframes confettiTilt{
-      0%{ transform: rotate(0deg) }
-      50%{ transform: rotate(18deg) }
-      100%{ transform: rotate(0deg) }
-    }
-
-    /* flower confetti (SVG wrapper) */
-    .confetti-flower{
-      position:absolute; width:22px; height:22px; pointer-events:none; will-change: transform, opacity;
-      animation: confettiFall linear forwards, confettiSwing 900ms ease-in-out infinite;
-      transform-origin:center;
-    }
-
-    @keyframes confettiSwing{
-      0%{ transform: translateX(0) rotate(0deg) }
-      25%{ transform: translateX(6px) rotate(8deg) }
-      50%{ transform: translateX(0) rotate(0deg) }
-      75%{ transform: translateX(-6px) rotate(-8deg) }
-      100%{ transform: translateX(0) rotate(0deg) }
-    }
-
-    /* Heart */
-    .heart{
-      width:56px; height:56px; display:inline-block; transform-origin:center; transition: transform 420ms cubic-bezier(.2,.9,.2,1);
-    }
-
-    .heart.pop{ animation: heartPop 900ms cubic-bezier(.2,.9,.2,1) both }
-    @keyframes heartPop{ 0%{ transform:scale(.8) } 40%{ transform:scale(1.22) } 70%{ transform:scale(.92) } 100%{ transform:scale(1) } }
-
-    /* Accessibility preference */
-    @media (prefers-reduced-motion: reduce){ .section, .card, button, .confetti-piece, .heart{ transition:none !important; animation:none !important } }
-  </style>
+		@keyframes confetti-fall{from{top:-12vh;opacity:1}to{top:110vh;opacity:0}}
+		@keyframes confetti-rot{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+	</style>
 </head>
 <body>
   <div id="container">
-
     <div class="hero">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
-        <rect width="24" height="24" rx="6" fill="url(#g)" />
-        <defs>
-          <linearGradient id="g" x1="0" x2="1">
-            <stop offset="0" stop-color="#fff1f1" />
-            <stop offset="1" stop-color="#ffeef0" />
-          </linearGradient>
-        </defs>
-        <g transform="translate(4,4)" fill="none">
-          <path d="M8 0C6.5 0 5.5 1 5 1.9 4.5 1 3.5 0 2 0 0 0 0 2 0 2 0 6 8 10 8 10s8-4 8-8c0 0 0-2-2-2-1.5 0-2.5 1-3 1.9C11.5 1 10.5 0 9 0z" fill="#ffb6b6" />
-        </g>
-      </svg>
-      <div style="text-align:left">
-        <h1>One month together</h1>
-        <p>Little notes & surprises</p>
-      </div>
-    </div>
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="6" fill="#fff1f1"/><path d="M12.001 4.529c1.855-3.04 7.042-1.68 7.042 2.256 0 3.038-2.737 5.123-6.09 8.094L12 18.35l-1.953-3.421C6.695 11.908 3.96 9.822 3.96 6.784c0-3.936 5.185-5.296 7.042-2.255z" fill="#ffb6b6"/></svg>
 
-    <!-- Section 1 -->
-    <section class="section active" id="section1">
-      <p style="font-size:18px;">Hi Cynthia 🙂<br>I built you something small.</p>
-      <div class="controls">
-        <button id="btn1">Click if you’re curious</button>
-        <button class="secondary" id="shareQuick1">Share</button>
-      </div>
-    </section>
+		<!-- Landing / gallery -->
+		<section class="section active" id="section0">
+			<p style="font-size:18px;margin-bottom:8px;">Our story</p>
+			<p style="font-size:13px;color:var(--muted);margin:0 0 12px 0;">Click any moment to explore</p>
+			<div class="story-gallery">
+				<div class="story-card" id="storyCard1"><img src="images/image-1.jpeg" alt="Moment 1"/></div>
+				<div class="story-card" id="storyCard2"><img src="images/image-2.jpeg" alt="Moment 2"/></div>
+				<div class="story-card" id="storyCard3"><img src="images/image-3.jpeg" alt="Moment 3"/></div>
+				<div class="story-card" id="storyCard4"><img src="images/image-4.jpeg" alt="Moment 4"/></div>
+			</div>
+			<div class="controls"><button id="skipStoryBtn">Skip & Continue</button></div>
+		</section>
 
-    <!-- Section 2 -->
-    <section class="section" id="section2">
-      <p style="font-weight:600; color:var(--muted)">Things I’ve learned in one month with you</p>
-      <div class="cards">
-        <div class="card" id="card1" role="button" tabindex="0" aria-pressed="false" data-track="audio/card1.mp3">
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <div class="text">You have a calm presence. Talking to you makes noisy days quieter.</div>
-            <div class="caption"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v10l3-2" stroke="#ff5e5e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> gentle piano</div>
-          </div>
-          <div class="dancer" aria-hidden="true">
-            <div class="figure shape-circle" style="background:#ffd166"></div>
-          </div>
-        </div>
+			<!-- Story views -->
+			<section class="section" id="storyView1">
+				<div class="story-bg"><img src="images/image-1.jpeg" alt="Moment 1"/></div>
+				<div class="controls"><button class="secondary storyBackBtn">Back</button><button id="nextStory1">Next</button></div>
+			</section>
 
-        <div class="card" id="card2" role="button" tabindex="0" aria-pressed="false" data-track="audio/card2.mp3">
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <div class="text">You pretend to be serious, but your laugh always gives you away.</div>
-            <div class="caption"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 12h18" stroke="#7dd3fc" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> upbeat beat</div>
-          </div>
-          <div class="dancer" aria-hidden="true">
-            <div class="figure shape-square" style="background:#7dd3fc"></div>
-          </div>
-        </div>
+			<section class="section" id="storyView2">
+				<div class="story-bg"><img src="images/image-2.jpeg" alt="Moment 2"/></div>
+				<div class="controls"><button class="secondary storyBackBtn">Back</button><button id="nextStory2">Next</button></div>
+			</section>
 
-        <div class="card" id="card3" role="button" tabindex="0" aria-pressed="false" data-track="audio/card3.mp3">
-          <div style="display:flex; flex-direction:column; gap:6px;">
-            <div class="text">I write code for a living, but you somehow keep debugging my mood.</div>
-            <div class="caption"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3v18" stroke="#c4b5fd" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> mellow synth</div>
-          </div>
-          <div class="dancer" aria-hidden="true">
-            <div class="figure shape-triangle" style="background:#c4b5fd"></div>
-          </div>
-        </div>
-      </div>
-      <div class="controls">
-        <button class="secondary" id="backTo1">Back</button>
-        <button id="btn2">One last thing</button>
-        <button class="secondary" id="shareQuick2">Share</button>
-      </div>
-    </section>
+			<section class="section" id="storyView3">
+				<div class="story-bg"><img src="images/image-3.jpeg" alt="Moment 3"/></div>
+				<div class="controls"><button class="secondary storyBackBtn">Back</button><button id="nextStory3">Next</button></div>
+			</section>
 
-    <!-- Section 3 -->
-    <section class="section" id="section3">
-      <p style="font-size:20px; font-weight:600">I’m really glad I met you.<br>Happy one month, Cynthia.</p>
-      <p class="playful">💌 Here’s to more little surprises</p>
+			<section class="section" id="storyView4">
+				<div class="story-bg"><img src="images/image-4.jpeg" alt="Moment 4"/></div>
+				<div class="controls"><button class="secondary storyBackBtn">Back</button><button id="nextStory4">Continue</button></div>
+			</section>
+	
+		<!-- Main flow sections -->
+		<section class="section" id="section1">
+			<p style="font-size:18px;">Hi Cynthia<br/>I built you something small.</p>
+			<div class="controls"><button id="btn1">Click if you're curious</button><button class="secondary" id="shareQuick1">Share</button></div>
+		</section>
 
-      <div style="margin-top:18px; display:flex; align-items:center; gap:12px; justify-content:center">
-        <svg class="heart" id="heartSVG" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M12.001 4.529c1.855-3.04 7.042-1.68 7.042 2.256 0 3.038-2.737 5.123-6.09 8.094L12 18.35l-1.953-3.421C6.695 11.908 3.96 9.822 3.96 6.784c0-3.936 5.185-5.296 7.042-2.255z" fill="#ff5e5e"/>
-        </svg>
+		<section class="section" id="section2">
+			<p style="font-weight:600;color:var(--muted);">Things I've learned in one month with you</p>
+			<div class="cards">
+				<div class="card" id="card1" role="button" tabindex="0" aria-pressed="false"><div style="flex:1"><div class="text">You have a calm presence.</div></div><div class="dancer"><div class="figure shape-circle" style="background:#ffd166"></div></div></div>
+				<div class="card" id="card2" role="button" tabindex="0" aria-pressed="false"><div style="flex:1"><div class="text">Talking to you makes noisy days quieter.</div></div><div class="dancer"><div class="figure shape-square" style="background:#7dd3fc"></div></div></div>
+				<div class="card" id="card3" role="button" tabindex="0" aria-pressed="false"><div style="flex:1"><div class="text">I’ve learned that calm can be exciting.</div></div><div class="dancer"><div class="figure shape-triangle" style="background:#c4b5fd"></div></div></div>
+				<div class="card" id="card4" role="button" tabindex="0" aria-pressed="false"><div style="flex:1"><div class="text">That talking to you slows my mind in a good way.</div></div><div class="dancer"><div class="figure shape-circle" style="background:#ffd166"></div></div></div>
+				<div class="card" id="card5" role="button" tabindex="0" aria-pressed="false"><div style="flex:1"><div class="text">That I smile more when I see your name pop up.</div></div><div class="dancer"><div class="figure shape-square" style="background:#7dd3fc"></div></div></div>
+				<div class="card" id="card6" role="button" tabindex="0" aria-pressed="false"><div style="flex:1"><div class="text">That comfort is attractive.</div></div><div class="dancer"><div class="figure shape-triangle" style="background:#c4b5fd"></div></div></div>
+				<div class="card" id="card7" role="button" tabindex="0" aria-pressed="false"><div style="flex:1"><div class="text">That I like being intentional with you.</div></div><div class="dancer"><div class="figure shape-circle" style="background:#ffd166"></div></div></div>
+				<div class="card" id="card8" role="button" tabindex="0" aria-pressed="false"><div style="flex:1"><div class="text">And that getting to know you feels easy, not forced.</div></div><div class="dancer"><div class="figure shape-square" style="background:#7dd3fc"></div></div></div>
+				<div class="card" id="card9" role="button" tabindex="0" aria-pressed="false"><div style="flex:1"><div class="text">I’m glad it’s you.</div></div><div class="dancer"><div class="figure shape-triangle" style="background:#c4b5fd"></div></div></div>
+			</div>
+			<div class="controls"><button class="secondary" id="backTo1">Back</button><button id="btn2">One last thing</button><button class="secondary" id="shareQuick2">Share</button></div>
+		</section>
 
-        <div style="display:flex; gap:8px;">
-          <button class="secondary" id="backTo2">Back</button>
-          <button id="shareBtn">Share</button>
-          <button class="secondary" id="printBtn">Print</button>
-        </div>
-      </div>
-    </section>
+		<section class="section" id="section3">
+			<p style="font-size:20px;font-weight:600;">I'm really glad I met you.<br/>Happy one month, Cynthia.</p>
+			<p class="playful">Here's to more little surprises</p>
+			<div style="margin-top:18px;display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap"><svg class="heart" id="heartSVG" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.001 4.529c1.855-3.04 7.042-1.68 7.042 2.256 0 3.038-2.737 5.123-6.09 8.094L12 18.35l-1.953-3.421C6.695 11.908 3.96 9.822 3.96 6.784c0-3.936 5.185-5.296 7.042-2.255z" fill="#ff5e5e"/></svg>
+				<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="secondary" id="backTo2">Back</button><button id="shareBtn">Share</button><button class="secondary" id="printBtn">Print</button></div>
+			</div>
+		</section>
 
-  </div>
+		</div>
 
-  <!-- Confetti layer -->
-  <div id="confetti" aria-hidden="true"></div>
+		<div id="confetti" aria-hidden="true"></div>
 
-  <script>
-    const btn1 = document.getElementById('btn1');
-    const btn2 = document.getElementById('btn2');
-    const shareBtn = document.getElementById('shareBtn');
-    const printBtn = document.getElementById('printBtn');
-    const shareQuick1 = document.getElementById('shareQuick1');
-    const shareQuick2 = document.getElementById('shareQuick2');
+		<!-- Fullscreen story modal -->
+		<div id="storyModal" class="story-modal" aria-hidden="true">
+			<button class="sm-close" aria-label="Close">×</button>
+			<button class="sm-prev" aria-label="Previous">‹</button>
+			<div class="sm-viewport"><img id="storyModalImg" alt="Story image"/></div>
+			<button class="sm-next" aria-label="Next">›</button>
+		</div>
 
-    const section1 = document.getElementById('section1');
-    const section2 = document.getElementById('section2');
-    const section3 = document.getElementById('section3');
-
-    const cards = [
-      document.getElementById('card1'),
-      document.getElementById('card2'),
-      document.getElementById('card3')
-    ];
-    const backTo1 = document.getElementById('backTo1');
-    const backTo2 = document.getElementById('backTo2');
-
-    function revealCards() {
-      cards.forEach((card, index) => {
-        card.style.setProperty('--d', `${index * 140}ms`);
-        requestAnimationFrame(() => card.classList.add('show'));
-      });
-    }
-
-    btn1.addEventListener('click', () => {
-      section1.classList.remove('active');
-      section2.classList.add('active');
-      revealCards();
-      btn1.blur?.();
-    });
-
-    btn2.addEventListener('click', () => {
-      section2.classList.remove('active');
-      section3.classList.add('active');
-      triggerCelebrate();
-      btn2.blur?.();
-    });
-
-    // Back navigation: section2 -> section1
-    backTo1?.addEventListener('click', () => {
-      // hide cards
-      cards.forEach(c => c.classList.remove('show'));
-      section2.classList.remove('active');
-      section1.classList.add('active');
-      backTo1.blur?.();
-    });
-
-    // Back navigation: section3 -> section2
-    backTo2?.addEventListener('click', () => {
-      // clear any confetti remnants
-      const confetti = document.getElementById('confetti');
-      if(confetti) confetti.innerHTML = '';
-      section3.classList.remove('active');
-      section2.classList.add('active');
-      // re-reveal cards for a smooth return
-      requestAnimationFrame(() => revealCards());
-      backTo2.blur?.();
-    });
-
-    // --- Music + dancer logic for clickable cards ---
-    // WebAudio player helper that plays a sequence of frequencies
-    let audioCtx = null;
-    let currentPlayer = null;
-    let currentCard = null;
-
-    function ensureAudioContext(){
-      if(!audioCtx){
-        try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ audioCtx = null }
-      }
-      return audioCtx;
-    }
-
-    function playMelody(melody){
-      const ctx = ensureAudioContext();
-      if(!ctx) return { stop: ()=>{} };
-      const timeouts = [];
-      const oscs = [];
-      melody.forEach((note, i) => {
-        const [freq, dur, type='sine'] = note;
-        const t = setTimeout(()=>{
-          const o = ctx.createOscillator();
-          const g = ctx.createGain();
-          o.type = type;
-          o.frequency.value = freq;
-          g.gain.value = 0;
-          o.connect(g);
-          g.connect(ctx.destination);
-          const now = ctx.currentTime;
-          g.gain.setValueAtTime(0, now);
-          g.gain.linearRampToValueAtTime(0.12, now + 0.02);
-          o.start();
-          g.gain.linearRampToValueAtTime(0.0001, now + dur/1000 - 0.02);
-          setTimeout(()=>{ try{ o.stop() }catch(e){}; try{ o.disconnect() }catch(e){} }, dur + 40);
-          oscs.push(o);
-        }, melody.slice(0, i).reduce((s,n)=> s + n[1], 0));
-        timeouts.push(t);
-      });
-
-      return {
-        stop(){ timeouts.forEach(t=> clearTimeout(t)); oscs.forEach(o=>{ try{ o.stop() }catch(e){} }); }
-      };
-    }
-
-    // assign melodies (freq in Hz, duration in ms)
-    const melodies = {
-      card1: [ [440, 300, 'sine'], [392, 300, 'sine'], [349, 400, 'sine'] ],
-      card2: [ [660, 160, 'square'], [880, 160, 'square'], [660, 300, 'square'] ],
-      card3: [ [523, 200, 'triangle'], [783, 220, 'triangle'], [659, 380, 'triangle'] ]
-    };
-
-    // Helper to attempt loading a recorded audio track (returns wrapper or null)
-    function tryLoadAudio(src){
-      return new Promise((resolve) => {
-        if(!src) return resolve(null);
-        const a = new Audio();
-        a.src = src;
-        a.preload = 'auto';
-        a.crossOrigin = 'anonymous';
-        let finished = false;
-        const onCan = () => { if(finished) return; finished = true; cleanup(); resolve({ element: a, play(){ a.currentTime = 0; a.play(); }, stop(){ try{ a.pause(); a.currentTime = 0 }catch(e){} } }); };
-        const onErr = () => { if(finished) return; finished = true; cleanup(); resolve(null); };
-        const cleanup = () => { a.removeEventListener('canplaythrough', onCan); a.removeEventListener('error', onErr); };
-        a.addEventListener('canplaythrough', onCan, {once:true});
-        a.addEventListener('error', onErr, {once:true});
-        // give it a short time to load metadata/canplay
-        a.load();
-        // fallback timeout
-        setTimeout(()=>{ if(!finished){ finished = true; cleanup(); // if it has readyState, accept it
-          if(a.readyState >= 3) resolve({ element: a, play(){ a.currentTime = 0; a.play(); }, stop(){ try{ a.pause(); a.currentTime = 0 }catch(e){} } }); else resolve(null); } }, 1200);
-      });
-    }
-
-    function stopCurrent(){
-      if(currentPlayer){
-        // wrapper: may have element or stop()
-        try{
-          if(currentPlayer.element && typeof currentPlayer.element.pause === 'function'){
-            currentPlayer.element.pause();
-            currentPlayer.element.currentTime = 0;
-          } else if(typeof currentPlayer.stop === 'function'){
-            currentPlayer.stop();
-          }
-        }catch(e){}
-      }
-      if(currentCard){
-        currentCard.classList.remove('active');
-        currentCard.setAttribute('aria-pressed','false');
-        currentCard = null;
-      }
-      currentPlayer = null;
-    }
-
-    // make cards interactive: click or keyboard
-    cards.forEach(card => {
-      // prepare: store a promise to attempt loading every card's audio track lazily when first interacted
-      card._audioPromise = null;
-
-      async function activate(){
-        const id = card.id;
-        // toggle
-        if(currentCard === card){ stopCurrent(); return }
-        stopCurrent();
-        card.classList.add('active');
-        card.setAttribute('aria-pressed','true');
-        currentCard = card;
-
-        // Try recorded clip if provided via data-track
-        const src = card.dataset.track;
-        if(src){
-          if(!card._audioPromise) card._audioPromise = tryLoadAudio(src);
-          const audioWrapper = await card._audioPromise;
-          if(audioWrapper){
-            currentPlayer = audioWrapper;
-            try{ audioWrapper.play(); }catch(e){
-              // if play fails, fallback to synth
-              currentPlayer = playMelody(melodies[id] || melodies.card1);
-            }
-            return;
-          }
-        }
-
-        // fallback to synthesized melody
-        const mel = melodies[id] || melodies.card1;
-        currentPlayer = playMelody(mel);
-      }
-
-      card.addEventListener('click', (e)=>{ activate(); });
-      card.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activate(); } });
-    });
-
-    // stop audio/dancer when navigating away from section2
-    function cleanupOnLeaveSection2(){ stopCurrent(); }
-    btn1.addEventListener('click', cleanupOnLeaveSection2);
-    backTo1?.addEventListener('click', cleanupOnLeaveSection2);
-    backTo2?.addEventListener('click', cleanupOnLeaveSection2);
-
-    // Share functionality with graceful fallback
-    async function tryShare(data){
-      const text = data.text || "A sweet one month surprise";
-      const url = data.url || window.location.href;
-      const title = data.title || document.title;
-      if(navigator.share){
-        try{ await navigator.share({ title, text, url }); return true }catch(e){ console.warn('share failed', e); }
-      }
-      // fallback: copy to clipboard
-      if(navigator.clipboard){
-        try{ await navigator.clipboard.writeText(`${title} - ${text}\n${url}`); alert('Link copied to clipboard'); return true }catch(e){ console.warn('clipboard failed', e); }
-      }
-      // last resort: prompt
-      prompt('Copy this link', url);
-      return false;
-    }
-
-    shareBtn.addEventListener('click', () => tryShare({ title: 'Happy one month', text: 'A small surprise for you' }));
-    shareQuick1.addEventListener('click', () => tryShare({ title: 'One month surprise', text: 'Check this out' }));
-    shareQuick2.addEventListener('click', () => tryShare({ title: 'One month surprise', text: 'Check this out' }));
-    printBtn.addEventListener('click', () => window.print());
-
-    // Confetti generator (lightweight)
-    function createConfettiPiece(container, x){
-      const colors = ['#ff5e5e','#ffd166','#6ee7b7','#7dd3fc','#c4b5fd'];
-      // 25% chance to spawn a flower-shaped confetti
-      if(Math.random() < 0.25){
-        const el = document.createElement('div');
-        el.className = 'confetti-flower';
-        const size = 14 + Math.random() * 18;
-        el.style.width = size + 'px';
-        el.style.height = size + 'px';
-        const left = (x + (Math.random() * 80 - 40));
-        el.style.left = left + 'vw';
-        el.style.top = '-12vh';
-        el.style.opacity = String(0.9 + Math.random() * 0.1);
-        el.style.transform = `rotate(${Math.random()*360}deg)`;
-        const dur = 1200 + Math.random() * 1200;
-        el.style.animationDuration = dur + 'ms';
-        el.style.zIndex = 60;
-        // create simple flower SVG inline
-        const fill = colors[Math.floor(Math.random() * colors.length)];
-        el.innerHTML = `
-          <svg viewBox="0 0 24 24" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <g transform="translate(12,12)">
-              <circle r="2.2" fill="${fill}" />
-              <g fill="${fill}" opacity="0.95">
-                <ellipse rx="1.8" ry="3.6" transform="rotate(0) translate(0,-6)"/>
-                <ellipse rx="1.8" ry="3.6" transform="rotate(60) translate(0,-6)"/>
-                <ellipse rx="1.8" ry="3.6" transform="rotate(120) translate(0,-6)"/>
-                <ellipse rx="1.8" ry="3.6" transform="rotate(180) translate(0,-6)"/>
-                <ellipse rx="1.8" ry="3.6" transform="rotate(240) translate(0,-6)"/>
-                <ellipse rx="1.8" ry="3.6" transform="rotate(300) translate(0,-6)"/>
-              </g>
-            </g>
-          </svg>
-        `;
-        container.appendChild(el);
-        setTimeout(()=> el.remove(), dur + 400);
-        return;
-      }
-
-      // regular rectangular confetti
-      const el = document.createElement('div');
-      el.className = 'confetti-piece';
-      const w = 8 + Math.random() * 10;
-      const h = w * (0.8 + Math.random() * 0.6);
-      el.style.width = w + 'px';
-      el.style.height = h + 'px';
-      el.style.background = colors[Math.floor(Math.random() * colors.length)];
-      el.style.left = (x + (Math.random() * 80 - 40)) + 'vw';
-      el.style.top = '-10vh';
-      el.style.opacity = String(0.9 + Math.random() * 0.1);
-      el.style.transform = `rotate(${Math.random()*360}deg)`;
-      el.style.animationDuration = (1100 + Math.random() * 1200) + 'ms';
-      el.style.zIndex = 60;
-      container.appendChild(el);
-      // remove after animation
-      setTimeout(()=> el.remove(), 3000);
-    }
-
-    function createConfetti(count=30){
-      const container = document.getElementById('confetti');
-      for(let i=0;i<count;i++){
-        const x = Math.random() * 100;
-        createConfettiPiece(container, x);
-      }
-    }
-
-    // Heart pop
-    const heart = document.getElementById('heartSVG');
-    function popHeart(){
-      heart.classList.remove('pop');
-      // trigger reflow
-      void heart.offsetWidth;
-      heart.classList.add('pop');
-    }
-
-    // Trigger celebrate when showing final section
-    function triggerCelebrate(){
-      // Respect reduced motion
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if(!prefersReduced){
-        createConfetti(40);
-        popHeart();
-      }
-    }
-
-    // Accessibility: keyboard focus helper
-    (function addFocusVisiblePolyfill(){
-      function onKeyDown(e){ if(e.key === 'Tab') document.documentElement.classList.add('show-focus'); }
-      function onMouseDown(){ document.documentElement.classList.remove('show-focus'); }
-      window.addEventListener('keydown', onKeyDown, {once:true});
-      window.addEventListener('mousedown', onMouseDown);
-    })();
-  </script>
-</body>
+		<script src="script.js"></script>
+	</body>
 </html>
